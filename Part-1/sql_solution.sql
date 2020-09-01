@@ -2,26 +2,26 @@ CREATE DATABASE IF NOT EXISTS business_sql;
 
 -- ЗАДАНИЕ 1
 
--- СОЗДАНИЕ ТАБЛИЦ
 CREATE TABLE t_provider (
-	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `name` VARCHAR(45) NOT NULL UNIQUE
 );
 
 CREATE TABLE t_schedule (
-	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `type` VARCHAR(15) NOT NULL UNIQUE
 );
 
 CREATE TABLE t_contractor_scheduler (
-	provider_id INT NOT NULL,
+    provider_id INT NOT NULL,
     schedule_id INT NOT NULL,
     date_begin DATETIME NOT NULL,
     date_end DATETIME NOT NULL,
-    CONSTRAINT check_date_begin CHECK 
-    (DATEDIFF(date_end, date_begin) > 0),
-    FOREIGN KEY (provider_id)  REFERENCES t_provider (id) ON DELETE CASCADE,
-    PRIMARY KEY (provider_id, date_begin)
+    CONSTRAINT check_date_begin CHECK (DATEDIFF(date_end, date_begin) > 0),
+    FOREIGN KEY (provider_id)
+        REFERENCES t_provider (id)
+        ON DELETE CASCADE,
+    PRIMARY KEY (provider_id , date_begin)
 );
 
 -- ЗАПОЛНЕНИЕ БД данными
@@ -66,18 +66,18 @@ VALUES (3, 8, '2019-02-02 00:00', '9999-12-31 00:00');
 -- ЗАДАНИЕ 2
 
 CREATE TABLE t_contractor_work_day (
-id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-`name` VARCHAR(45) NOT NULL,
-date_begin DATETIME NOT NULL,
-date_end DATETIME NOT NULL
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `name` VARCHAR(45) NOT NULL,
+    date_begin DATETIME NOT NULL,
+    date_end DATETIME NOT NULL
 );
 
 -- ЗАДАНИЕ 3
 
 CREATE TABLE t_work_mode (
-`type` CHAR(1) NOT NULL PRIMARY KEY,
-time_begin TIME NOT NULL,
-duration TIME NOT NULL
+    `type` CHAR(1) NOT NULL PRIMARY KEY,
+    time_begin TIME NOT NULL,
+    duration TIME NOT NULL
 );
 
 INSERT INTO t_work_mode (`type`, time_begin, duration)
@@ -194,23 +194,38 @@ CALL add_contractor_work_days('2019-01-01 00:00:00',
 							  '2019-03-02 00:00:00');
 
 -- Выборка, содержащая сколько рабочих дней было у каждого поставщика
-SELECT `name`, COUNT(*) AS count
-FROM t_contractor_work_day
+SELECT 
+    `name`, COUNT(*) AS count
+FROM
+    t_contractor_work_day
 GROUP BY `name`;
 
 -- Выборка поставщиков, у которыйх было больше 10 рабочих дней за январь 2019 года
-SELECT `name` FROM
-	(SELECT `name`, COUNT(*) AS count
-	FROM t_contractor_work_day
-	WHERE MONTH(date_begin) = 1 AND YEAR(date_begin) = 2019
-	GROUP BY `name`) AS t
-WHERE t.count > 10;
+SELECT 
+    `name`
+FROM
+    (SELECT 
+        `name`, COUNT(*) AS count
+    FROM
+        t_contractor_work_day
+    WHERE
+        MONTH(date_begin) = 1
+            AND YEAR(date_begin) = 2019
+    GROUP BY `name`) AS t
+WHERE
+    t.count > 10;
 
 -- Выборка поставщиков, кто работал 14, 15 и 16 января 2019 года
-SELECT DISTINCT `name`
-FROM t_contractor_work_day
-WHERE MONTH(date_begin) = 1 AND YEAR(date_begin) = 2019 AND
-DAY(date_begin) = 14 OR DAY(date_begin) = 15 OR DAY(date_begin) = 16;
+SELECT DISTINCT
+    `name`
+FROM
+    t_contractor_work_day
+WHERE
+    MONTH(date_begin) = 1
+        AND YEAR(date_begin) = 2019
+        AND DAY(date_begin) = 14
+        OR DAY(date_begin) = 15
+        OR DAY(date_begin) = 16;
 
 
 
